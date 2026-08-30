@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Vanity Numbers &middot; Recent Callers</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9742;</text></svg>"
+    />
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="masthead-inner">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">&#9742;</span>
+          <div>
+            <h1>Vanity Numbers</h1>
+            <p class="tagline">The last five callers to the Amazon Connect line</p>
+          </div>
+        </div>
+        <div class="status" role="status" aria-live="polite">
+          <span class="pulse" id="pulse" aria-hidden="true"></span>
+          <span id="status-text">Loading&hellip;</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- Rendered by app.js. Kept empty in the served HTML so there is exactly
+           one source of truth for the markup. -->
+      <div class="skeleton" id="skeleton">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+      <ol class="calls" id="calls" hidden></ol>
+
+      <div class="empty" id="empty" hidden>
+        <h2>No calls yet</h2>
+        <p>
+          Dial the Amazon Connect number for this deployment. Once the IVR reads your vanity numbers
+          back to you, this page will show them within a few seconds.
+        </p>
+      </div>
+
+      <div class="error" id="error" hidden role="alert">
+        <h2>Could not load recent callers</h2>
+        <p id="error-detail"></p>
+        <button type="button" id="retry">Try again</button>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Caller numbers are masked on the server before they leave the database. Records expire
+        automatically after 90 days.
+      </p>
+      <p class="footer-meta">
+        Auto-refreshes every 15&nbsp;seconds &middot; <span id="last-updated">never</span>
+      </p>
+    </footer>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

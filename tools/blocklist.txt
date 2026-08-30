@@ -1,0 +1,125 @@
+# Words excluded from the vanity dictionary.
+#
+# Rationale: this dictionary drives text that is SPOKEN to callers and PRINTED
+# in a public web app. A vanity number that spells something offensive is a
+# brand-safety incident, not a bug report. Filtering at dictionary-build time is
+# cheap and cannot be bypassed at runtime.
+#
+# PRODUCTION NOTE: this hand-rolled list is deliberately small and English-only.
+# In a real deployment I would replace it with a maintained, locale-aware
+# brand-safety list (e.g. a licensed profanity corpus or AWS Comprehend's
+# toxicity detection) sourced at build time, plus a runtime deny-list in SSM
+# Parameter Store so the list can be updated without a redeploy. I would also
+# add a "confusable" filter for words that are innocuous alone but offensive in
+# combination with an adjacent token.
+anal
+anus
+arse
+ass
+asses
+bastad
+bastard
+bitch
+bitches
+bollock
+bollocks
+boob
+boobs
+bugger
+bukkake
+bullshit
+cock
+cocks
+coon
+coons
+crap
+crappy
+cum
+cunt
+cunts
+dago
+damn
+dick
+dicks
+dildo
+dyke
+dykes
+fag
+fags
+faggot
+fart
+farts
+fuck
+fucked
+fucker
+fucks
+fuk
+gook
+goy
+hell
+hoe
+hoes
+homo
+honky
+horny
+jap
+jerk
+jism
+jizz
+kike
+knob
+kraut
+milf
+minge
+nazi
+nazis
+negro
+nigga
+nigger
+nonce
+paki
+penis
+piss
+pissed
+poof
+poon
+porn
+porno
+prick
+pube
+pubes
+pussy
+queer
+rape
+raped
+raper
+rapes
+rapist
+rectum
+retard
+scrote
+semen
+sex
+sexy
+shag
+shit
+shite
+shits
+skank
+slag
+slut
+sluts
+spic
+spunk
+tit
+tits
+titty
+turd
+twat
+vagina
+wank
+wanker
+whore
+whores
+wog
+wop

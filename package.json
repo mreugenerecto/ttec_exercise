@@ -1,0 +1,48 @@
+{
+  "name": "vanity-connect",
+  "version": "1.0.0",
+  "description": "Amazon Connect vanity-number IVR: Lambda + DynamoDB + contact flow + web app, deployed with AWS CDK.",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "vanity-connect": "bin/vanity-connect.js"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "gen:dictionary": "ts-node --transpileOnly tools/build-dictionary.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "tsc --noEmit",
+    "cdk": "cdk",
+    "synth": "cdk synth",
+    "deploy": "cdk deploy --all",
+    "destroy": "cdk destroy --all"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.699.0",
+    "@aws-sdk/lib-dynamodb": "^3.699.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.0",
+    "@types/source-map-support": "^0.5.10",
+    "aws-cdk": "^2.1000.0",
+    "aws-cdk-lib": "^2.267.0",
+    "constructs": "^10.4.2",
+    "esbuild": "^0.24.0",
+    "jest": "^29.7.0",
+    "source-map-support": "^0.5.21",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
+    "wordlist-english": "^1.2.1"
+  },
+  "allowScripts": {
+    "esbuild@0.24.2": true
+  }
+}

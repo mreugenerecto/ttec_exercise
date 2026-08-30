@@ -1,0 +1,15 @@
+node_modules/
+cdk.out/
+*.js
+*.d.ts
+!web/app.js
+!jest.config.js
+coverage/
+.env
+.env.*
+cdk.context.json
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 760" width="1120" height="760" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+  <title id="title">Vanity number IVR architecture</title>
+  <desc id="desc">A caller reaches an Amazon Connect contact flow, which invokes a Lambda that parses the caller ID, generates and scores vanity numbers, writes the best five to DynamoDB, and returns the top three as SSML. A separate CloudFront distribution serves a static web app and a read-only API Lambda that lists recent callers from the same table.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5c636e"/>
+    </marker>
+    <marker id="arrow-faint" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9aa1ad"/>
+    </marker>
+  </defs>
+
+  <style>
+    .band { fill: #f4f6f9; stroke: #dfe3e9; stroke-width: 1; }
+    .band-label { fill: #7b8390; font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+    .node { fill: #ffffff; stroke-width: 1.6; rx: 9; }
+    .node-title { font-size: 13.5px; font-weight: 640; fill: #16181d; }
+    .node-sub { font-size: 11px; fill: #656d79; }
+    .chip { fill: #ffffff; stroke: #dfe3e9; stroke-width: 1; rx: 6; }
+    .chip-text { font-size: 11.5px; fill: #2c313a; }
+    .chip-mono { font-size: 11px; fill: #2c313a; font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .edge { stroke: #5c636e; stroke-width: 1.6; fill: none; marker-end: url(#arrow); }
+    .edge-faint { stroke: #9aa1ad; stroke-width: 1.3; fill: none; stroke-dasharray: 5 4; marker-end: url(#arrow-faint); }
+    .edge-label { font-size: 10.5px; fill: #656d79; }
+    .caption { font-size: 11px; fill: #878e99; }
+    .svc { font-size: 9.5px; font-weight: 700; letter-spacing: .06em; }
+  </style>
+
+  <rect width="1120" height="760" fill="#ffffff"/>
+
+  <!-- ══════════════════════════════ VOICE PATH ══════════════════════════════ -->
+  <rect class="band" x="24" y="52" width="1072" height="268" rx="14"/>
+  <text class="band-label" x="44" y="76">Voice path — what the caller experiences</text>
+
+  <!-- Caller -->
+  <rect class="node" x="44" y="140" width="118" height="86" stroke="#8a919c"/>
+  <text class="node-title" x="103" y="176" text-anchor="middle">☎ Caller</text>
+  <text class="node-sub" x="103" y="195" text-anchor="middle">dials the</text>
+  <text class="node-sub" x="103" y="209" text-anchor="middle">claimed number</text>
+
+  <!-- Amazon Connect -->
+  <rect class="node" x="204" y="100" width="238" height="166" stroke="#DD344C"/>
+  <text class="svc" x="222" y="124" fill="#DD344C">AMAZON CONNECT</text>
+  <text class="node-title" x="222" y="144">Contact flow</text>
+
+  <rect class="chip" x="222" y="156" width="202" height="26"/>
+  <text class="chip-mono" x="232" y="173">AWS::Connect::PhoneNumber</text>
+
+  <rect class="chip" x="222" y="188" width="202" height="26"/>
+  <text class="chip-text" x="232" y="205">Invoke Lambda · 8 s limit</text>
+
+  <rect class="chip" x="222" y="220" width="202" height="26"/>
+  <text class="chip-text" x="232" y="237">Play prompt (SSML) → hang up</text>
+
+  <!-- Vanity Lambda -->
+  <rect class="node" x="484" y="90" width="288" height="186" stroke="#ED7100"/>
+  <text class="svc" x="502" y="114" fill="#ED7100">AWS LAMBDA</text>
+  <text class="node-title" x="502" y="134">VanityFunction</text>
+  <text class="node-sub" x="502" y="150">arm64 · 512 MB · 6 s timeout</text>
+
+  <rect x="502" y="160" width="252" height="100" rx="8" fill="#fdf7f1" stroke="#f0c49a" stroke-dasharray="4 3"/>
+  <text class="node-sub" x="514" y="178" font-weight="640" fill="#a35a12">vanity engine — pure, no I/O</text>
+  <text class="chip-text" x="514" y="197">1 · parse + validate caller ID (NANP)</text>
+  <text class="chip-text" x="514" y="214">2 · segment 7 digits into words/digits</text>
+  <text class="chip-text" x="514" y="231">3 · score for memorability → rank</text>
+  <text class="chip-text" x="514" y="248">4 · render SSML for Polly</text>
+
+  <!-- DynamoDB -->
+  <rect class="node" x="826" y="140" width="238" height="150" stroke="#4053D6"/>
+  <text class="svc" x="844" y="164" fill="#4053D6">AMAZON DYNAMODB</text>
+  <text class="node-title" x="844" y="184">Call records</text>
+
+  <rect class="chip" x="844" y="196" width="202" height="24"/>
+  <text class="chip-mono" x="854" y="212">pk CALLER#&lt;e164&gt;</text>
+  <rect class="chip" x="844" y="224" width="202" height="24"/>
+  <text class="chip-mono" x="854" y="240">sk CALL#&lt;ts&gt;#&lt;contact&gt;</text>
+  <rect class="chip" x="844" y="252" width="202" height="24"/>
+  <text class="chip-mono" x="854" y="268">gsi recent-calls-index</text>
+
+  <!-- Voice edges -->
+  <path class="edge" d="M 162 183 L 198 183"/>
+  <path class="edge" d="M 442 178 L 478 178"/>
+  <text class="edge-label" x="460" y="168" text-anchor="middle">invoke</text>
+  <path class="edge" d="M 478 205 L 442 205"/>
+  <text class="edge-label" x="460" y="225" text-anchor="middle">flat string map</text>
+  <path class="edge" d="M 772 183 L 820 183"/>
+  <text class="edge-label" x="796" y="173" text-anchor="middle">PutItem</text>
+  <text class="edge-label" x="796" y="199" text-anchor="middle">best 5</text>
+  <path class="edge" d="M 198 213 L 168 213"/>
+  <text class="edge-label" x="183" y="233" text-anchor="middle">top 3 spoken</text>
+
+  <text class="caption" x="44" y="308">Persistence is best-effort: if the write fails the caller still hears their numbers, and an alarm fires. See DESIGN-DECISIONS.md.</text>
+
+  <!-- ══════════════════════════════ WEB PATH ══════════════════════════════ -->
+  <rect class="band" x="24" y="352" width="1072" height="242" rx="14"/>
+  <text class="band-label" x="44" y="376">Web path — the bonus app, one origin, no CORS</text>
+
+  <!-- Browser -->
+  <rect class="node" x="44" y="432" width="118" height="86" stroke="#8a919c"/>
+  <text class="node-title" x="103" y="468" text-anchor="middle">Browser</text>
+  <text class="node-sub" x="103" y="487" text-anchor="middle">polls every</text>
+  <text class="node-sub" x="103" y="501" text-anchor="middle">15 seconds</text>
+
+  <!-- CloudFront -->
+  <rect class="node" x="204" y="400" width="238" height="150" stroke="#8C4FFF"/>
+  <text class="svc" x="222" y="424" fill="#8C4FFF">AMAZON CLOUDFRONT</text>
+  <text class="node-title" x="222" y="444">One distribution</text>
+
+  <rect class="chip" x="222" y="456" width="202" height="26"/>
+  <text class="chip-text" x="232" y="473">default → S3 (private, OAC)</text>
+  <rect class="chip" x="222" y="488" width="202" height="26"/>
+  <text class="chip-mono" x="232" y="505">/api/* → HTTP API</text>
+  <rect class="chip" x="222" y="520" width="202" height="22"/>
+  <text class="chip-text" x="232" y="535">CSP · HSTS · no-cache on /api</text>
+
+  <!-- S3 -->
+  <rect class="node" x="484" y="392" width="134" height="76" stroke="#7AA116"/>
+  <text class="svc" x="498" y="414" fill="#7AA116">AMAZON S3</text>
+  <text class="node-title" x="498" y="433">Static site</text>
+  <text class="node-sub" x="498" y="450">html · css · js</text>
+
+  <!-- API GW + Lambda -->
+  <rect class="node" x="484" y="484" width="288" height="86" stroke="#ED7100"/>
+  <text class="svc" x="502" y="506" fill="#ED7100">API GATEWAY → LAMBDA</text>
+  <text class="node-title" x="502" y="525">RecentCallsFunction</text>
+  <text class="node-sub" x="502" y="542">GET /api/recent · throttled 50 rps</text>
+  <text class="node-sub" x="502" y="558">masks caller numbers · reserved concurrency 10</text>
+
+  <!-- Web edges -->
+  <path class="edge" d="M 162 475 L 198 475"/>
+  <path class="edge" d="M 442 440 L 478 430"/>
+  <path class="edge" d="M 442 505 L 478 517"/>
+  <path class="edge" d="M 772 520 L 900 520 L 900 296"/>
+  <text class="edge-label" x="836" y="512" text-anchor="middle">Query, newest first</text>
+
+  <!-- ══════════════════════════════ OBSERVABILITY ══════════════════════════════ -->
+  <rect class="band" x="24" y="626" width="1072" height="110" rx="14"/>
+  <text class="band-label" x="44" y="650">Observability — collected from both paths above</text>
+
+  <rect class="node" x="204" y="662" width="238" height="56" stroke="#E7157B"/>
+  <text class="svc" x="222" y="684" fill="#E7157B">CLOUDWATCH LOGS</text>
+  <text class="node-sub" x="222" y="702">structured JSON · phone numbers redacted</text>
+
+  <rect class="node" x="484" y="662" width="288" height="56" stroke="#E7157B"/>
+  <text class="svc" x="502" y="684" fill="#E7157B">METRICS + 4 ALARMS</text>
+  <text class="node-sub" x="502" y="702">errors · p99 latency · dropped writes · throttles</text>
+
+  <rect class="node" x="826" y="662" width="238" height="56" stroke="#E7157B"/>
+  <text class="svc" x="844" y="684" fill="#E7157B">AMAZON SNS</text>
+  <text class="node-sub" x="844" y="702">email the on-call address</text>
+
+  <path class="edge-faint" d="M 442 690 L 478 690"/>
+  <path class="edge-faint" d="M 772 690 L 820 690"/>
+</svg>
