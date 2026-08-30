@@ -23,6 +23,25 @@ Full diagram and component-by-component walkthrough: **[docs/ARCHITECTURE.md](do
 
 ---
 
+## Live deployment
+
+Deployed to account `732837096611`, region `ap-southeast-1`.
+
+| | |
+| --- | --- |
+| **Phone number** | **+1 (312) 264-8616** — dial it |
+| **Web app** | https://db4a0gn07w2ve.cloudfront.net |
+| **API** | https://db4a0gn07w2ve.cloudfront.net/api/recent |
+| Connect instance | `arn:aws:connect:ap-southeast-1:732837096611:instance/5678f93f-1957-4529-a79e-219fa78b4bd9` |
+| Contact flow | `Vanity Number Lookup` — PUBLISHED, ACTIVE, associated to the number |
+
+The number is a US DID chosen over toll-free because it is cheaper to leave running
+(~$1/month rather than ~$2, and ~$0.0022/min inbound rather than ~$0.012). **It bills whether
+or not anyone calls it** — `npx cdk destroy --all -c connectInstanceArn=...` stops that, and
+the Connect instance then needs deleting by hand since this project did not create it.
+
+---
+
 ## Documentation
 
 | Document | What is in it |
@@ -38,7 +57,7 @@ Full diagram and component-by-component walkthrough: **[docs/ARCHITECTURE.md](do
 
 ```bash
 npm install
-npm test                 # 178 tests, ~25s
+npm test                 # 179 tests, ~25s
 npm run synth            # CloudFormation for all three stacks
 ```
 
@@ -100,6 +119,7 @@ command line.
 | `recentShardCount` | `1` | Feed index shards. See [the repository](src/lib/repository.ts) for when to raise it. |
 | `retentionDays` | `90` | DynamoDB TTL on call records. |
 | `destroyDataOnDelete` | `true` | `cdk destroy` removes the table and bucket. **Set `false` for anything real.** |
+| `apiReservedConcurrency` | *(unset)* | Reserve concurrency for the public API Lambda. Unset by default — AWS rejects any reservation leaving under 10 unreserved executions, and a new account's entire limit is 10. See [PRODUCTION-READINESS](docs/PRODUCTION-READINESS.md#the-web-edge). |
 | `stackPrefix` | `Vanity` | Prefix for stack names, so several copies can coexist. |
 
 Runtime behaviour is Lambda environment variables (`RESULTS_TO_STORE`, `RESULTS_TO_SPEAK`,
@@ -133,7 +153,7 @@ src/
   handlers/
     connect-vanity.ts            invoked by the contact flow
     api-recent.ts                invoked by API Gateway for the web app
-test/                          178 tests mirroring src/ and lib/
+test/                          179 tests mirroring src/ and lib/
 tools/
   build-dictionary.ts          generates the dictionary from SCOWL word lists
   blocklist.txt                words excluded from a customer-facing IVR

@@ -40,6 +40,13 @@ function intContext(key: string, fallback: number): number {
   return parsed;
 }
 
+/** Like intContext, but absent means "do not set this at all". */
+function optionalIntContext(key: string): number | undefined {
+  const raw = app.node.tryGetContext(key);
+  if (raw === undefined || raw === null || raw === '') return undefined;
+  return intContext(key, 0);
+}
+
 const connectInstanceArn: string | undefined = app.node.tryGetContext('connectInstanceArn');
 const alarmEmail: string | undefined = app.node.tryGetContext('alarmEmail');
 const prefix: string = app.node.tryGetContext('stackPrefix') ?? 'Vanity';
@@ -103,6 +110,7 @@ if (deployWebApp) {
     recentIndexName: core.recentIndexName,
     recentShardCount,
     destroyDataOnDelete,
+    apiReservedConcurrency: optionalIntContext('apiReservedConcurrency'),
   });
 }
 

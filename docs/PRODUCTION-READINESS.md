@@ -66,7 +66,7 @@ changes ship independently of code and different tenants/locales can differ.
 
 ### 7. No integration or end-to-end tests
 
-178 unit and CDK-assertion tests, and nothing that talks to a real service. Missing:
+179 unit and CDK-assertion tests, and nothing that talks to a real service. Missing:
 
 - **DynamoDB Local in CI** — catches the class of bug unit tests structurally cannot:
   reserved words in expressions, item size limits, real TTL semantics.
@@ -169,6 +169,7 @@ This is the part people miss when they treat an IVR as "just another API".
   `INCLUDE` projection keeps that as small as possible; it should be re-checked if attributes
   are added.
 
+<a id="the-web-edge"></a>
 ### The web edge
 
 - **AWS WAF on the distribution** — a rate-based rule is the single highest-value addition
@@ -179,10 +180,15 @@ This is the part people miss when they treat an IVR as "just another API".
 - **CloudFront caching for `/api/*`** is deliberately disabled so the page is live. Under
   load, a 1–5 second edge TTL collapses a flood into one origin request per second — a big
   lever, and one that is a one-line change.
-- The API already has: 50 rps / 100 burst throttling, `reservedConcurrentExecutions: 10` so a
-  flood cannot exhaust account concurrency and take the **IVR** Lambda down with it, a
-  bounded `limit` parameter validated before any I/O, and error responses that never echo the
-  underlying AWS message (which names the table, region, and sometimes the account).
+- The API already has: 50 rps / 100 burst throttling at API Gateway, a bounded `limit`
+  parameter validated before any I/O, and error responses that never echo the underlying AWS
+  message (which names the table, region, and sometimes the account).
+- **Reserved concurrency on the API Lambda is available but off by default.** It is worth
+  having — it turns a flood into 429s on that one function instead of exhausting account
+  concurrency and taking the **IVR** Lambda down with it — but AWS rejects any reservation
+  that would leave fewer than 10 unreserved executions, and a brand-new account's entire
+  limit *is* 10. Hard-coding it made the stack undeployable in exactly the kind of account a
+  reviewer uses. It is now `-c apiReservedConcurrency=N`, and in production it is set.
 
 ### Data protection and compliance
 

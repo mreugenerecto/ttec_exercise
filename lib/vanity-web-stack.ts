@@ -33,6 +33,22 @@ export interface VanityWebStackProps extends cdk.StackProps {
   readonly recentShardCount?: number;
   /** Matches the core stack so `cdk destroy` really removes everything. */
   readonly destroyDataOnDelete?: boolean;
+  /**
+   * Reserved concurrency for the public read API. Unset by default, and that
+   * default is deliberate rather than lazy.
+   *
+   * A cap here is genuinely valuable: it turns a traffic flood into 429s on this
+   * one function instead of exhausting account concurrency and taking the *IVR*
+   * Lambda down with it. But a reserved value is carved out of the account's
+   * pool, and AWS refuses any reservation that would leave fewer than 10
+   * unreserved executions. A brand-new account has a limit of exactly 10, so
+   * hard-coding a reservation makes this stack undeployable in precisely the
+   * account a reviewer is most likely to use -- which is how I found out.
+   *
+   * So it is opt-in: `-c apiReservedConcurrency=10` once the account limit has
+   * been raised. In production this is set, and sized against the account limit.
+   */
+  readonly apiReservedConcurrency?: number;
 }
 
 export class VanityWebStack extends cdk.Stack {
@@ -68,11 +84,12 @@ export class VanityWebStack extends cdk.Stack {
       },
       bundling: { minify: true, sourceMap: true, target: 'node22' },
       tracing: lambda.Tracing.ACTIVE,
-      // A public endpoint is a public spend risk. Capping concurrency turns a
-      // traffic flood into 429s on this one function instead of exhausting the
-      // account's concurrency and taking the IVR Lambda down with it. That
-      // blast-radius separation is the whole point of setting it.
-      reservedConcurrentExecutions: 10,
+      // See the prop docs: valuable, but not safe to hard-code. The API is not
+      // left unprotected without it -- API Gateway throttling below is the first
+      // line of defence and does not depend on the account's concurrency pool.
+      ...(props.apiReservedConcurrency !== undefined
+        ? { reservedConcurrentExecutions: props.apiReservedConcurrency }
+        : {}),
     });
 
     // Read-only, and only on the index the feed actually uses.

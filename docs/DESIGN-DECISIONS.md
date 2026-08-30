@@ -189,6 +189,31 @@ list is small and English-only, which is itself a shortcut —
 [PRODUCTION-READINESS](PRODUCTION-READINESS.md#5-the-brand-safety-list-is-hand-rolled) covers
 what it should be.
 
+**A brand-new AWS account cannot reserve Lambda concurrency at all.** I set
+`reservedConcurrentExecutions: 10` on the public API Lambda for a good reason — a flood
+should become 429s on that one function rather than exhausting account concurrency and
+taking the *IVR* Lambda down with it. The deploy failed:
+
+> `Specified ReservedConcurrentExecutions for function decreases account's
+> UnreservedConcurrentExecution below its minimum value of [10]`
+
+A reservation is carved out of the account pool, AWS refuses to leave fewer than 10
+unreserved, and a fresh account's entire limit *is* 10 — so **no** reservation is possible.
+Hard-coding it made the stack undeployable in precisely the account a reviewer is most likely
+to use. It is now an opt-in `-c apiReservedConcurrency=N`, with the reasoning in the prop
+docs so the next person does not "helpfully" hard-code it again. API Gateway throttling was
+already the first line of defence and does not depend on the account pool, so nothing was
+actually lost. I would not have found this without deploying to a clean account.
+
+**The web app's loading skeletons never went away.** Everything worked — the API returned
+data, the cards rendered — and three empty placeholder boxes stayed pinned above them. The
+code sets `element.hidden = true`, which is correct. But `hidden` is only `display: none` in
+the *user-agent* stylesheet, and `.skeleton { display: grid }` in my own CSS has equal
+specificity and author-origin priority, so it silently won. One line
+(`[hidden] { display: none !important }`) fixes it for every element on the page. No unit
+test would have caught this; I found it by loading the deployed page and looking at it, which
+is an argument for doing that as a matter of course rather than trusting a green suite.
+
 **SCOWL tiers past 50 are unusable.** Including tiers 55–70 adds ~12,000 words that are
 almost all archaisms and inflected rarities, and they crowd out good answers because they
 often have better coverage. Capping at tier 50 (23,873 words) was a straight quality win.

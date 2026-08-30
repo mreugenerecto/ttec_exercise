@@ -287,9 +287,27 @@ describe('VanityWebStack', () => {
     });
   });
 
-  it('caps the public API Lambda concurrency to contain a traffic flood', () => {
-    template.hasResourceProperties('AWS::Lambda::Function', {
-      ReservedConcurrentExecutions: 10,
+  it('does not reserve concurrency by default, so it deploys in a fresh account', () => {
+    // AWS rejects any reservation that would leave under 10 unreserved
+    // executions, and a new account's whole limit is 10. Hard-coding one makes
+    // the stack undeployable exactly where a reviewer will try it.
+    const functions = template.findResources('AWS::Lambda::Function');
+    for (const fn of Object.values(functions)) {
+      expect((fn.Properties as Record<string, unknown>).ReservedConcurrentExecutions).toBeUndefined();
+    }
+  });
+
+  it('caps the public API Lambda concurrency when asked to', () => {
+    const otherApp = new cdk.App();
+    const otherCore = new VanityCoreStack(otherApp, 'CoreStack', { env: ENV });
+    const capped = new VanityWebStack(otherApp, 'WebStack', {
+      env: ENV,
+      table: otherCore.table,
+      recentIndexName: otherCore.recentIndexName,
+      apiReservedConcurrency: 25,
+    });
+    Template.fromStack(capped).hasResourceProperties('AWS::Lambda::Function', {
+      ReservedConcurrentExecutions: 25,
     });
   });
 

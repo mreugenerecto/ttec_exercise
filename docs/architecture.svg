@@ -125,7 +125,7 @@
   <text class="svc" x="502" y="506" fill="#ED7100">API GATEWAY → LAMBDA</text>
   <text class="node-title" x="502" y="525">RecentCallsFunction</text>
   <text class="node-sub" x="502" y="542">GET /api/recent · throttled 50 rps</text>
-  <text class="node-sub" x="502" y="558">masks caller numbers · reserved concurrency 10</text>
+  <text class="node-sub" x="502" y="558">masks caller numbers · bounded limit · errors never leak</text>
 
   <!-- Web edges -->
   <path class="edge" d="M 162 475 L 198 475"/>

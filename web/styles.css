@@ -55,6 +55,15 @@
   box-sizing: border-box;
 }
 
+/* The `hidden` attribute is only `display: none` in the *user-agent* stylesheet,
+ * so any author rule that sets `display` on the same element silently wins --
+ * `.skeleton { display: grid }` below is exactly that case, and without this line
+ * the loading placeholders never go away once the data arrives. This is what
+ * makes `element.hidden = true` in app.js actually do something. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: var(--bg);
