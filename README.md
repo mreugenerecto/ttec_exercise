@@ -23,25 +23,6 @@ Full diagram and component-by-component walkthrough: **[docs/ARCHITECTURE.md](do
 
 ---
 
-## Live deployment
-
-Deployed to account `732837096611`, region `ap-southeast-1`.
-
-| | |
-| --- | --- |
-| **Phone number** | **+1 (312) 264-8616** — dial it |
-| **Web app** | https://db4a0gn07w2ve.cloudfront.net |
-| **API** | https://db4a0gn07w2ve.cloudfront.net/api/recent |
-| Connect instance | `arn:aws:connect:ap-southeast-1:732837096611:instance/5678f93f-1957-4529-a79e-219fa78b4bd9` |
-| Contact flow | `Vanity Number Lookup` — PUBLISHED, ACTIVE, associated to the number |
-
-The number is a US DID chosen over toll-free because it is cheaper to leave running
-(~$1/month rather than ~$2, and ~$0.0022/min inbound rather than ~$0.012). **It bills whether
-or not anyone calls it** — `npx cdk destroy --all -c connectInstanceArn=...` stops that, and
-the Connect instance then needs deleting by hand since this project did not create it.
-
----
-
 ## Documentation
 
 | Document | What is in it |
